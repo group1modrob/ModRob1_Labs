@@ -17,4 +17,4 @@ R_sample = np.array([[0, -1, 0],
 p_sample = np.array([1, 2, 3])
 
 T_sample = homogeneous_matrix(R_sample, p_sample)
-T_sample
+print(T_sample)

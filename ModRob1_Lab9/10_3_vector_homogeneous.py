@@ -7,4 +7,4 @@ def to_homogeneous_coordinates(v):
 # Sample 3-vector
 sample_vector = np.array([2, 3, 4])
 homogeneous_vector = to_homogeneous_coordinates(sample_vector)
-homogeneous_vector
+print(homogeneous_vector)

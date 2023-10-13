@@ -25,4 +25,4 @@ T_sample_for_inverse = np.array([
 
 # Compute the inverse for the sample T
 T_sample_inverse = inverse_homogeneous_matrix(T_sample_for_inverse)
-T_sample_inverse
+print(T_sample_inverse)

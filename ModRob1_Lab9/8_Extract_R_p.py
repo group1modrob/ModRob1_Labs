@@ -17,4 +17,5 @@ T_demo_sample = np.array([
 
 # Extract R and p from the demo sample T
 R_demo_extracted, p_demo_extracted = extract_from_homogeneous(T_demo_sample)
-R_demo_extracted, p_demo_extracted
+print(R_demo_extracted)
+print(p_demo_extracted)
