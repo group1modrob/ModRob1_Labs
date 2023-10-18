@@ -9,9 +9,9 @@ def extract_from_homogeneous(T):
 
 # Sample Input for homogeneous transformation matrix T
 T_demo_sample = np.array([
-    [0.707, -0.707, 0, 7],
-    [0.707, 0.707, 0, 8],
-    [0, 0, 1, 9],
+    [0, -1, 0, 3],
+    [0, 0, -1, 0],
+    [1, 0, 0, 0],
     [0, 0, 0, 1]
 ])
 
