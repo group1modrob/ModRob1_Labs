@@ -1,8 +1,11 @@
 import numpy as np
 
 #input the six-vector screw axis and q
-S = np.array([[0],[0.447],[0.8944],[1.345],[0],[0]])
-q = 2.23
+# S = np.array([[0],[0.447],[0.8944],[1.345],[0],[0]])
+# q = 2.23
+
+S = np.array([[0],[1/np.sqrt(5)],[2/np.sqrt(5)],[3/np.sqrt(5)],[0],[0]])
+q = 1/np.sqrt(5)
 
 # extract Sw and Sv
 Sw = np.array([[0,-S[2,0],S[1,0]],[S[2,0],0,-S[0,0]],[-S[1,0],S[0,0],0]])
