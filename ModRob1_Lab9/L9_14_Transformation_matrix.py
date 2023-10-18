@@ -1,24 +1,24 @@
 import numpy as np
 
-#input the six-vector screw axis and q
-# S = np.array([[0],[0.447],[0.8944],[1.345],[0],[0]])
-# q = 2.23
+S_sample = np.array([[0],[1/np.sqrt(5)],[2/np.sqrt(5)],[3/np.sqrt(5)],[0],[0]])
+q_sample=2.23
+#Calculates S_bracket from S_w and S_v from S_sample
+def get_s_w_bracket_and_s_v(S):
+    s_w = S[:3]
+    s_w_bracket=np.array([[0, -s_w[2][0], s_w[1][0]], [s_w[2][0], 0, -s_w[0][0]], [-s_w[1][0], s_w[0][0], 0]])
+    s_v = S[3:]
+    return s_w_bracket, s_v
 
-S = np.array([[0],[1/np.sqrt(5)],[2/np.sqrt(5)],[3/np.sqrt(5)],[0],[0]])
-q = 1/np.sqrt(5)
+s_omega,s_nu=get_s_w_bracket_and_s_v(S_sample)
+#Calculates T with rotaitonal and linear part 
+def get_T(s_w_bracket,s_v, theta):
+    e_s_q=np.eye(3)+(np.sin(theta)*s_w_bracket)+((1-np.cos(theta))*(s_w_bracket @ s_w_bracket))
+    g_s_q=((np.eye(3)*theta)+((1-np.cos(theta))*s_w_bracket)+(theta-np.sin(theta))*(s_w_bracket @ s_w_bracket))@s_v
+    
+    T=np.concatenate((e_s_q,g_s_q),1)
+    #Adds the extra row
+    row=np.array([0, 0, 0, 1])
+    T=np.vstack([T,row])
+    return T
 
-# extract Sw and Sv
-Sw = np.array([[0,-S[2,0],S[1,0]],[S[2,0],0,-S[0,0]],[-S[1,0],S[0,0],0]])
-Sv = np.array([[S[3,0]],[S[4,0]],[S[5,0]]])
-
-# calculate the rotational part of transformation matrix
-e_Sw = np.array(np.identity(3)+(np.sin(q)*Sw) + (1-np.cos(q))*(np.matmul(Sw,Sw)))
-
-# calculate the linear part of transformation matrix
-G = np.array(np.matmul((np.identity(3)*q)+((1-np.cos(q))*Sw)+((q-np.sin(q))*(np.matmul(Sw,Sw))),Sv))
-
-# extract the transformation matrix
-T = np.array([[e_Sw[0,0],e_Sw[0,1],e_Sw[0,2],G[0,0]],[e_Sw[1,0],e_Sw[1,1],e_Sw[1,2],G[1,0]],[e_Sw[2,0],e_Sw[2,1],e_Sw[2,2],G[2,0]],[0,0,0,1]])
-
-# print the result
-print('Your transformation matrix is ',T)
+print(get_T(s_omega,s_nu,q_sample))
