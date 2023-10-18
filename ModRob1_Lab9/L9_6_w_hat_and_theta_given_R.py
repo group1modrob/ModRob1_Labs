@@ -115,5 +115,5 @@ def w_hat_and_theta_given_R(R):
         return theta, w_hat, w_hat_bracket
     
 # Test
-theta, w_hat, w_hat_bracket = w_hat_and_theta_given_R(R)
-print(w_hat_bracket)
+# theta, w_hat, w_hat_bracket = w_hat_and_theta_given_R(R)
+# print(w_hat_bracket)
