@@ -1,5 +1,6 @@
 # Import
 import numpy as np
+from 6_w_hat_and_theta_given_R import w_hat_and_theta_given_R
 
 # Sample matrix defined by the user
 T_sample = np.array([
@@ -11,7 +12,7 @@ T_sample = np.array([
 
 # Extract R
 R = T_sample[:3, :3]
-p = T[:3, 3]
+p = T_sample[:3, 3]
 
 # Calculate the trace (diagonal)
 trace_value = np.trace(R)

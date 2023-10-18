@@ -107,3 +107,7 @@ def w_hat_and_theta_given_R(R):
         w_hat = w_hat1
         w_hat_bracket = np.array([[0, -w_hat[2], w_hat[1], w_hat[2], 0, -w_hat[0], -w_hat[1], w_hat[0], 0]])
         return theta, w_hat, w_hat_bracket
+    
+# Test
+theta, w_hat, w_hat_bracket = w_hat_and_theta_given_R(R)
+print(w_hat_bracket)
