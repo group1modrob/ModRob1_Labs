@@ -23,13 +23,13 @@ def w_hat_and_theta_given_R(R):
         w1_hat_1 = w_hat_bracket_1[2][1]
         w2_hat_1 = w_hat_bracket_1[0][2]
         w3_hat_1 = w_hat_bracket_1[1][0]
-        w_hat1 = [w1_hat_1, w2_hat_1, w3_hat_1]
+        w_hat1 = np.array([w1_hat_1, w2_hat_1, w3_hat_1])
         
         w_hat_bracket_2 = 1/(2*np.sin(theta2)) * (R - R.T)
         w1_hat_2 = w_hat_bracket_2[2][1]
         w2_hat_2 = w_hat_bracket_2[0][2]
         w3_hat_2 = w_hat_bracket_2[1][0]
-        w_hat2 = [w1_hat_2, w2_hat_2, w3_hat_2]
+        w_hat2 = np.array([w1_hat_2, w2_hat_2, w3_hat_2])
 
         # Print the result!
         if verbose:
@@ -85,7 +85,7 @@ def w_hat_and_theta_given_R(R):
             # Check if this is equal to R, and if so, check if it has been added to solutions. If NOT, then add it as a potential solution:
             if np.allclose(R, w_hat, atol=tolerance):
                 if [w1_hat, w2_hat, w3_hat] not in solutions:
-                    solutions.append([w1_hat, w2_hat, w3_hat])
+                    solutions.append(np.array([w1_hat, w2_hat, w3_hat]))
             
             # Stop if two solutions have been found
             if len(solutions) >= 2:
