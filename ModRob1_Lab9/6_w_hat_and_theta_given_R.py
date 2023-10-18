@@ -45,7 +45,8 @@ def w_hat_and_theta_given_R(R):
         # Return only the first option for simplicity
         theta = theta1
         w_hat = w_hat1
-        return theta, w_hat
+        w_hat_bracket = w_hat_bracket_1
+        return theta, w_hat, w_hat_bracket
 
     # Scenario 2: theta = k*pi AND k is an EVEN integer
     elif theta1/np.pi % 2 == 0:
@@ -104,4 +105,5 @@ def w_hat_and_theta_given_R(R):
         # Return only the first option for simplicity
         theta = theta1
         w_hat = w_hat1
-        return theta, w_hat
+        w_hat_bracket = np.array([[0, -w_hat[2], w_hat[1], w_hat[2], 0, -w_hat[0], -w_hat[1], w_hat[0], 0]])
+        return theta, w_hat, w_hat_bracket
