@@ -50,7 +50,13 @@ def w_hat_and_theta_given_R(R):
 
     # Scenario 2: theta = k*pi AND k is an EVEN integer
     elif theta1/np.pi % 2 == 0:
-        print("\nRESULT: w_hat cannot be obtained because R = I and the axis of rotation is undefined!\n")
+        print("\nWARNING: R = I and the axis of rotation is undefined!\n")
+
+        # For Sw and Sv (for use in part 15)
+        theta = 0
+        w_hat = np.array([0, 0, 0])
+        w_hat_bracket = np.zeros(3)
+        return theta, w_hat, w_hat_bracket
 
     # Scenario 3: theta = k*pi AND k is an ODD integer
     elif theta1/np.pi % 2 != 0:

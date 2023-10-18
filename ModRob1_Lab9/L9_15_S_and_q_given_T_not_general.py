@@ -4,7 +4,7 @@ from L9_6_w_hat_and_theta_given_R import w_hat_and_theta_given_R
 
 # Sample matrix defined by the user
 T_sample = np.array([
-    [0, 1, 0, 5],
+    [0, -1, 0, 3],
     [0, 0, 0, 6],
     [1, 0, -1, 0],
     [0, 0, 0, 1]
@@ -48,7 +48,10 @@ elif theta/np.pi % 2 != 0:
     # w_hat is Sw
     Sw = w_hat
     Sw_bracket = w_hat_bracket
-    Sv = (1/theta) * np.eye(3) - 0.5 * Sw_bracket + ((1/theta - 0.5/np.tan(theta/2)) * (w_hat @ Sw_bracket)) @ p
-    S = np.array([Sw, Sv])
+    Sv = ((1/theta) * np.eye(3) - 0.5 * Sw_bracket + ((1/theta - 0.5/np.tan(theta/2)) * (w_hat @ Sw_bracket))) @ p
+    print("YOLOOOOOOOOOOOOO")
+    print(Sv)
+    print("YOLOOOOOOOOOOOOOOOOOOOOOOOOO")
+    S = np.concatenate([Sw, Sv])
     print(f"\nS = {S}")
     print(f"q = {theta}")
