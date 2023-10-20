@@ -1,3 +1,6 @@
+"""
+This code snippet was developed by Bryan. 
+"""
 import numpy as np
 from L9_6_w_hat_and_theta_given_R import w_hat_and_theta_given_R
 

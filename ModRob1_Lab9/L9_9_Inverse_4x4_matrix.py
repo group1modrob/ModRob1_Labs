@@ -1,3 +1,6 @@
+"""
+This code snippet was developed by Namrata. 
+"""
 import numpy as np
 
 def inverse_homogeneous_matrix(T):

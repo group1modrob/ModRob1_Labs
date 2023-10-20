@@ -1,3 +1,6 @@
+"""
+This code snippet was developed by Tai. 
+"""
 import numpy as np
 def s_and_q_given_Sq(S_q):
     # normalize screw S

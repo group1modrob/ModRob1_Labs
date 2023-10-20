@@ -1,3 +1,6 @@
+"""
+This code snippet was developed by Tai. 
+"""
 import numpy as np
 
 # input homogeneous transformation matrix here

@@ -1,3 +1,6 @@
+"""
+This code snippet was developed by Namrata. 
+"""
 import numpy as np
 def to_homogeneous_coordinates(v):
     assert len(v) == 3, "Input vector must be of length 3"

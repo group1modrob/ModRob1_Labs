@@ -1,3 +1,6 @@
+"""
+This code snippet was developed by Wilfredo. 
+"""
 import numpy as np
 
 # Define your w_hat_theta

@@ -1,3 +1,6 @@
+"""
+This code snippet was developed by Wilfredo. 
+"""
 import numpy as np
 
 # Set the numpy print preferences

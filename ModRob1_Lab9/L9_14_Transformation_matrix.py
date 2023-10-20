@@ -1,3 +1,6 @@
+"""
+This code snippet was developed by Bryan. 
+"""
 import numpy as np
 
 S_sample = np.array([[0],[1/np.sqrt(5)],[2/np.sqrt(5)],[3/np.sqrt(5)],[0],[0]])

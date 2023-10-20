@@ -1,3 +1,6 @@
+"""
+This code snippet was developed by Namrata. 
+"""
 import numpy as np
 
 def extract_from_homogeneous(T):
