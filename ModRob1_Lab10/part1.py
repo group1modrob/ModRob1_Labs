@@ -18,6 +18,7 @@ t2 = 0
 t3 = np.pi/4
 t4 = 0
 
+# Define the robot properties
 theta= np.array([[t1],[t2],[t3],[t4]])
 
 H1 = 89.45
