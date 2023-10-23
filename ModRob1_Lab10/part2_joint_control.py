@@ -5,13 +5,20 @@ from interbotix_xs_modules.xs_robot.arm import InterbotixManipulatorXS
 
 def main():
 
-    # TODO: Define the joint angles in radians considering the joint limits
+    #JOINT ANGLES IN DEGREES
     
-    #joint angles in degrees
+    # FOR LAB EXAMPLE
+    # waist_j1=0
+    # shoulder_j2=0
+    # elbow_j3= -90
+    # wrist_j4= 90
+    
+    #OUR CUSTOM POSE
     waist_j1=0
     shoulder_j2=0
-    elbow_j3= -90
-    wrist_j4= 90
+    elbow_j3= 45
+    wrist_j4= 0
+
 
     #Conditionals to secure max and min lmit
     if waist_j1 >=180:
