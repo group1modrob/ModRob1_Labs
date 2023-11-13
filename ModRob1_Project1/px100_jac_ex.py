@@ -80,7 +80,7 @@ class FrameListener(Node):
 
     # Create the subscriber
     print("CREATING THE SUBSCRIBER:")
-    self.subscription = self.create_subscription("JointState",'px100/joint_states',self.listener_callback,1)
+    self.subscription = self.create_subscription(JointState,'px100/joint_states',self.listener_callback,1)
     print("CREATED THE SUBSCRIBER!")
     self.subscription # prevent unused variable warning
 
@@ -91,7 +91,7 @@ class FrameListener(Node):
                        [0.0, 0.0, 0.0, 0.0],
                        [0.0, 0.0, 0.0, 0.0],
                        [0.0, 0.0, 0.0, 0.0],
-                       [0.0, 0.0, 0.0, 0.0]]) # Iinitial jacobian
+                       [0.0, 0.0, 0.0, 0.0]]) # Initial jacobian
 
     
 
@@ -190,10 +190,7 @@ class FrameListener(Node):
       Callback function.
       """
       # Display the message on the console
-      print("CALLED THE CALLBACK FUNCTION!")
       self.angles = [data.position[0], data.position[1], data.position[2], data.position[3]]
-      print("FINISHED THE CALLBACK FUNCTION!")
-
 
 """
 MAIN FUNCTION
