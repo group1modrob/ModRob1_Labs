@@ -64,6 +64,9 @@ class FrameListener(Node):
     # Create velocity publishers for robot joints (waist, shoulder, elbow, wrist)  
     self.publisher_vel = self.create_publisher(Twist, 'end_eff_vel', 1)
 
+    # Create the velocity error publisher
+    self.publisher_vel_err = self.create_publisher(Twist, 'vel_err', 1)
+
     # Call on_timer function on a set interval
     timer_period = 0.1
     self.timer = self.create_timer(timer_period, self.on_timer)
@@ -71,6 +74,26 @@ class FrameListener(Node):
     # Past variables' initialization
     self.homogeneous_matrix_old = np.zeros((4, 4)); self.homogeneous_matrix_old[3, 3] = 1.0 # Past homogeneous matrix
     self.ti = self.get_clock().now().nanoseconds / 1e9 # Initial time
+    
+    # Create joint position variable
+    self.angles = [0.0, 0.0, 0.0, 0.0]
+
+    # Create the subscriber
+    print("CREATING THE SUBSCRIBER:")
+    self.subscription = self.create_subscription("JointState",'px100/joint_states',self.listener_callback,1)
+    print("CREATED THE SUBSCRIBER!")
+    self.subscription # prevent unused variable warning
+
+    # Define your jacobian matrix which is dependent on joint positions (angles)
+    # all zero elements of the matrix should be calculated and entered in this matrix as a function of joint angles
+    self.J = np.array([[0.0, 0.0, 0.0, 0.0],
+                       [0.0, 0.0, 0.0, 0.0],
+                       [0.0, 0.0, 0.0, 0.0],
+                       [0.0, 0.0, 0.0, 0.0],
+                       [0.0, 0.0, 0.0, 0.0],
+                       [0.0, 0.0, 0.0, 0.0]]) # Iinitial jacobian
+
+    
 
   
   def on_timer(self):
@@ -126,6 +149,23 @@ class FrameListener(Node):
     vel_msg.angular.z = ang_vel[2]
     self.publisher_vel.publish(vel_msg)
 
+    # Compute twist using jacobian
+    # self.J = 
+    # vel_from_jac = self.J @ np.array([[0.0],
+    #                                   [0.0],
+    #                                   [0.0],
+    #                                   [0.0]])
+    
+    # # Publish the velocity error message
+    # vel_err_msg = Twist()
+    # vel_err_msg.linear.x = 
+    # vel_err_msg.linear.y =
+    # vel_err_msg.linear.z = 
+    # vel_err_msg.angular.x = 
+    # vel_err_msg.angular.y =
+    # vel_err_msg.angular.z = 
+    # self.publisher_vel_err.publish(vel_err_msg) 
+
   def quaternion_to_rotation_matrix(self, q0, q1, q2, q3):
     """
     Convert a quaternion into a rotation matrix
@@ -143,8 +183,16 @@ class FrameListener(Node):
     homogeneous_matrix[:3, :3] = rotation_matrix
 
     return homogeneous_matrix
-
-
+  
+  # Create the listener callback for the subscriber
+  def listener_callback(self, data):
+      """
+      Callback function.
+      """
+      # Display the message on the console
+      print("CALLED THE CALLBACK FUNCTION!")
+      self.angles = [data.position[0], data.position[1], data.position[2], data.position[3]]
+      print("FINISHED THE CALLBACK FUNCTION!")
 
 
 """
