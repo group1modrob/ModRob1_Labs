@@ -2,7 +2,13 @@
 clear; clc
 
 % Define our symbolic variables
-syms t1(t) t2(t) t3(t) t4(t) L1 L2 H1 H2
+syms t1(t) t2(t) t3(t) t4(t) %L1 L2 H1 H2
+
+% Define our robot dimensions
+L1 = 35;
+L2 = 100;
+H1 = 89.45;
+H2 = 100;
 
 % Define q and q_dot
 q = [t1; t2; t3; t4];
@@ -130,4 +136,4 @@ Vs2 = simplify(Js*q_dot);
 % Now to print all the answers
 % Vs
 Vs2
-Js
+vpa(Js) % Show results NOT in fractions!
