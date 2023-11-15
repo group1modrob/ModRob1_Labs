@@ -88,16 +88,17 @@ class FrameListener(Node):
     self.subscription = self.create_subscription(JointState,'px100/joint_states',self.listener_callback,1)
     self.subscription # prevent unused variable warning
 
+
+    # THIS PART OF THE CODE IS USELESS (i think...) AND WE SHOULD DELETE IT!!
     # Define your jacobian matrix which is dependent on joint positions (angles)
     # all zero elements of the matrix should be calculated and entered in this matrix as a function of joint angles
     # Calculated with Matlab code!
-    self.J = np.array([[0.0,       -np.sin(self.angles[0]),                                                            0.0,                                 0.0],
-                       [0.0,        np.cos(self.angles[0]),                                                            1.0,                                 1.0],
-                       [1.0,                           0.0,                                                            0.0,                                 0.0],
-                       [0.0, -89.45*np.cos(self.angles[0]), 35*np.sin(self.angles[1]) - 100*np.cos(self.angles[1]) - 89.45, 100*np.sin(self.angles[2]) - 189.45],
-                       [0.0, -89.45*np.sin(self.angles[0]),                                                            0.0,                                 0.0],
-                       [0.0,                           0.0,         35*np.cos(self.angles[1]) + 100*np.sin(self.angles[1]),     100*np.cos(self.angles[2]) + 35]]) # Initial jacobian
-
+    # self.J = np.array([[0.0,       -np.sin(self.angles[0]),                                                            0.0,                                 0.0],
+    #                    [0.0,        np.cos(self.angles[0]),                                                            1.0,                                 1.0],
+    #                    [1.0,                           0.0,                                                            0.0,                                 0.0],
+    #                    [0.0, -0.08945*np.cos(self.angles[0]), 0.035*np.sin(self.angles[1]) - 0.1*np.cos(self.angles[1]) - 0.08945, 0.1*np.sin(self.angles[2]) - 0.18945],
+    #                    [0.0, -0.08945*np.sin(self.angles[0]),                                                            0.0,                                 0.0],
+    #                    [0.0,                           0.0,         0.035*np.cos(self.angles[1]) + 0.1*np.sin(self.angles[1]),     0.1*np.cos(self.angles[2]) + 0.035]])
 
   def on_timer(self):
     """
@@ -179,9 +180,9 @@ class FrameListener(Node):
     self.J = np.array([[0.0,       -np.sin(self.angles[0]),                                                            0.0,                                 0.0],
                        [0.0,        np.cos(self.angles[0]),                                                            1.0,                                 1.0],
                        [1.0,                           0.0,                                                            0.0,                                 0.0],
-                       [0.0, -89.45*np.cos(self.angles[0]), 35*np.sin(self.angles[1]) - 100*np.cos(self.angles[1]) - 89.45, 100*np.sin(self.angles[2]) - 189.45],
-                       [0.0, -89.45*np.sin(self.angles[0]),                                                            0.0,                                 0.0],
-                       [0.0,                           0.0,         35*np.cos(self.angles[1]) + 100*np.sin(self.angles[1]),     100*np.cos(self.angles[2]) + 35]])
+                       [0.0, -0.08945*np.cos(self.angles[0]), 0.035*np.sin(self.angles[1]) - 0.1*np.cos(self.angles[1]) - 0.08945, 0.1*np.sin(self.angles[2]) - 0.18945],
+                       [0.0, -0.08945*np.sin(self.angles[0]),                                                            0.0,                                 0.0],
+                       [0.0,                           0.0,         0.035*np.cos(self.angles[1]) + 0.1*np.sin(self.angles[1]),     0.1*np.cos(self.angles[2]) + 0.035]])
     
     # Obtain the velocity from the Jacobian
     vel_from_jac = self.J @ np.array([[a_msg.cmd[0]],
