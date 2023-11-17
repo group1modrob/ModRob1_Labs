@@ -14,28 +14,8 @@ H2 = 100;
 q = [t1; t2; t3; t4];
 q_dot = simplify(diff(q, t));
 
-% Define T (the T for this robot is in the wiki for Lesson 9)
-% T = [cos(t1 + t2) -sin(t1 + t2) 0 L2*cos(t1+t2)+L1*cos(t1);
-%     sin(t1 + t2) cos(t1 + t2) 0 L2*sin(t1+t2)+L1*sin(t1);
-%     0 0 1 0;
-%     0 0 0 1];
 
-% Obtain the first derivative of T and the inverse of T (for use later)
-% T_dot = simplify(diff(T, t));
-% T_inv = simplify(inv(T));
-
-% FIRST METHOD OF OBTAINING OF THE SPACE TWIST Vs
-% Vs_bracket = simplify(T_dot * T_inv); % This returns a symfun object, and it is not indexable
-% Vs_bracket = Vs_bracket(t); % This evaluates the symfun object, return a sym object, and that IS indexable!
-% ws_bracket = Vs_bracket(1:3, 1:3); % This indexing would not work without evaluating the symfun object first!
-% vs = Vs_bracket(1:3, 4);
-% ws_x = ws_bracket(3, 2);
-% ws_y = ws_bracket(1, 3);
-% ws_z = ws_bracket(2, 1);
-% ws = [ws_x; ws_y; ws_z];
-% Vs = [ws; vs]; % FINAL ANSWER for this method
-
-% SECOND METHOD OF OBTAINING THE SPACE TWIST Vs
+% Get the Space Twist NuS
 
 % Obtain S1 and S2. Sw_i and a_i are obtained by visual inspection of the
 % robot picture in the lesson
@@ -134,6 +114,5 @@ Js = [Js1 Js2 Js3 Js4];
 Vs2 = simplify(Js*q_dot);
 
 % Now to print all the answers
-% Vs
-Vs2
+vpa(Vs2) % Show results NOT in fractions!
 vpa(Js) % Show results NOT in fractions!
