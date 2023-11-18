@@ -149,11 +149,11 @@ class FrameListener(Node):
     
     elif t - self.ti > 10 and t - self.ti <= 20:
       # Define the velocities (rad/sec) for each joint between 10 and 20 seconds. Bop it out!
-      a_msg.cmd = [-0.20, -sin((tempo*pi)*(self.get_clock().now().nanoseconds / 1e9)), sin((tempo*pi)*(self.get_clock().now().nanoseconds / 1e9)), sin((tempo*pi)*(self.get_clock().now().nanoseconds / 1e9))] # Initial velocity (rad/sec.)
+      a_msg.cmd = [-0.20, -sin((tempo*pi)*(self.get_clock().now().nanoseconds / 1e9)), sin((tempo*pi)*(self.get_clock().now().nanoseconds / 1e9)), sin((tempo*pi)*(self.get_clock().now().nanoseconds / 1e9))]
     
     elif t - self.ti > 20 and t - self.ti <= 21:
       # Define final velocities to finish the dance
-      a_msg.cmd = [0.7, -0.5, 0.8, -0.2] # Initial velocity (rad/sec.)
+      a_msg.cmd = [0.7, -0.5, 0.8, -0.2]
     
     else:
       # Stop it dead in its tracks
