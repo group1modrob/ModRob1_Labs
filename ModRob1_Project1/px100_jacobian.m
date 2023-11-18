@@ -5,10 +5,10 @@ clear; clc
 syms t1(t) t2(t) t3(t) t4(t) %L1 L2 H1 H2
 
 % Define our robot dimensions
-L1 = 35;
-L2 = 100;
-H1 = 89.45;
-H2 = 100;
+L1 = 35/1000;
+L2 = 100/1000;
+H1 = 89.45/1000;
+H2 = 100/1000;
 
 % Define q and q_dot
 q = [t1; t2; t3; t4];
@@ -17,7 +17,7 @@ q_dot = simplify(diff(q, t));
 
 % Get the Space Twist NuS
 
-% Obtain S1 and S2. Sw_i and a_i are obtained by visual inspection of the
+% Obtain Si. Sw_i and a_i are obtained by visual inspection of the
 % robot picture in the lesson
 
 Sw1 = [0; 0; 1];
