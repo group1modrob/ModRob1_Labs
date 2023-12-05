@@ -174,11 +174,42 @@ def main():
                             [0, 1, 0, 0.1],
                             [0, 0, 1, 0.1],
                             [0, 0, 0, 1]]) # Gripping location
-    
     Td_release = np.array([[1, 0, 0, 0.2],
                             [0, 1, 0, 0],
                             [0, 0, 1, 0.2],
                             [0, 0, 0, 1]]) # Throwing location
+    
+
+
+    ################################################################
+    # This is material we need to edit
+    Td_grasp2 = np.array([[1, 0, 0, 0],
+                            [0, 1, 0, 0],
+                            [0, 0, 1, 0],
+                            [0, 0, 0, 1]])
+    Td_release2 = np.array([[1, 0, 0, 0],
+                            [0, 1, 0, 0],
+                            [0, 0, 1, 0],
+                            [0, 0, 0, 1]])
+    Td_grasp3 = np.array([[1, 0, 0, 0],
+                            [0, 1, 0, 0],
+                            [0, 0, 1, 0],
+                            [0, 0, 0, 1]])
+    Td_release3 = np.array([[1, 0, 0, 0],
+                            [0, 1, 0, 0],
+                            [0, 0, 1, 0],
+                            [0, 0, 0, 1]])
+    Td_grasp4 = np.array([[1, 0, 0, 0],
+                            [0, 1, 0, 0],
+                            [0, 0, 1, 0],
+                            [0, 0, 0, 1]])
+    Td_release4 = np.array([[1, 0, 0, 0],
+                            [0, 1, 0, 0],
+                            [0, 0, 1, 0],
+                            [0, 0, 0, 1]])
+    ################################################################
+
+
 
     # Create experiment objects (use robot API + our custom API)
     bot = InterbotixManipulatorXS(
@@ -208,6 +239,37 @@ def main():
     bot.arm.set_joint_positions(joint_positions) # Set positions
     bot.gripper.release(2.0) # Release
     
+
+
+    ################################################################
+    # This is material we need to edit
+    bot.arm.go_to_home_pose()
+    joint_positions = my_api.num_IK(Td_grasp2, np.array([0.0, 0.0, 0.0, 0.0])) # Numeric inverse kinematics
+    bot.arm.set_joint_positions(joint_positions) # Set positions
+    bot.gripper.grasp(2.0) # Grip
+    joint_positions = my_api.num_IK(Td_release2, np.array([0.0, 0.0, 0.0, 0.0])) # Numeric inverse kinematics
+    bot.arm.set_joint_positions(joint_positions) # Set positions
+    bot.gripper.release(2.0) # Release
+
+    bot.arm.go_to_home_pose()
+    joint_positions = my_api.num_IK(Td_grasp3, np.array([0.0, 0.0, 0.0, 0.0])) # Numeric inverse kinematics
+    bot.arm.set_joint_positions(joint_positions) # Set positions
+    bot.gripper.grasp(2.0) # Grip
+    joint_positions = my_api.num_IK(Td_release3, np.array([0.0, 0.0, 0.0, 0.0])) # Numeric inverse kinematics
+    bot.arm.set_joint_positions(joint_positions) # Set positions
+    bot.gripper.release(2.0) # Release
+
+    bot.arm.go_to_home_pose()
+    joint_positions = my_api.num_IK(Td_grasp4, np.array([0.0, 0.0, 0.0, 0.0])) # Numeric inverse kinematics
+    bot.arm.set_joint_positions(joint_positions) # Set positions
+    bot.gripper.grasp(2.0) # Grip
+    joint_positions = my_api.num_IK(Td_release4, np.array([0.0, 0.0, 0.0, 0.0])) # Numeric inverse kinematics
+    bot.arm.set_joint_positions(joint_positions) # Set positions
+    bot.gripper.release(2.0) # Release
+    ################################################################
+
+
+
     # End mission
     bot.arm.go_to_home_pose()
     bot.arm.go_to_sleep_pose()
