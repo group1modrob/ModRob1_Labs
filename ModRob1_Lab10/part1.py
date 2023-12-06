@@ -13,19 +13,19 @@ USER INPUTS
 # t4 = np.pi/2
 
 # For our custom pose
-t1 = 0
-t2 = 0
-t3 = np.pi/4
-t4 = 0
+t1 = -45*np.pi/180
+t2 = -45*np.pi/180
+t3 = -45*np.pi/180
+t4 = -45*np.pi/180
 
 # Define the robot properties
 theta= np.array([[t1],[t2],[t3],[t4]])
 
-H1 = 89.45
-H2 = 100
-L1 = 35
-L2 = 100
-L3 = 107.6
+H1 = 89.45/1000
+H2 = 100/1000
+L1 = 35/1000
+L2 = 100/1000
+L3 = 107.6/1000
 
 a = np.array([
     [0, 0, 0],
