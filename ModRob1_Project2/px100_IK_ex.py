@@ -3,6 +3,17 @@ from math import atan2, sqrt, pi, acos, sin, cos, asin
 from scipy.linalg import logm, expm
 import numpy as np
 
+"""
+You might need to modify the following YAML files to change the speed of the robot's movement!
+File #1: /home/group1/interbotix_ws/install/interbotix_xsarm_control/share/interbotix_xsarm_control/config/modes.yaml
+File #2: /home/group1/interbotix_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_control/config/modes.yaml
+
+The parameter that you need to change to change the speed of the robot's movement is "profile_velocity" in File #2. The GREATER this number, the SLOWER your robot will move!
+
+The code we used to obtain the R's and p's is part1.py from Lab 10
+"""
+
+
 class ourAPI:
     def __init__(self):
 
