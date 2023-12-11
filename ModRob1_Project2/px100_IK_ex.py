@@ -2,6 +2,12 @@ from interbotix_xs_modules.xs_robot.arm import InterbotixManipulatorXS
 from math import atan2, sqrt, pi, acos, sin, cos, asin
 from scipy.linalg import logm, expm
 import numpy as np
+from interbotix_perception_modules.armtag import InterbotixArmTagInterface
+from interbotix_perception_modules.pointcloud import InterbotixPointCloudInterface
+from interbotix_xs_modules.xs_robot.arm import InterbotixManipulatorXS
+from . import px100_IK_ex
+# from px100_IK_ex import ourAPI
+from math import atan2, sin, cos, pi
 
 """
 You might need to modify the following YAML files to change the speed of the robot's movement!
@@ -13,269 +19,160 @@ The parameter that you need to change to change the speed of the robot's movemen
 The code we used to obtain the R's and p's is part1.py from Lab 10
 """
 
-
-class ourAPI:
-    def __init__(self):
-
-        # Robot parameters
-        self.L1 = 0.08945
-        self.L2 = 0.100
-        self.Lm = 0.035
-        self.L3 = 0.100
-        self.L4 = 0.1076
-        
-        # Screw Axes. Obtained from previous labs' code
-        self.S = np.array([[0, 0, 1, 0,                  0, 0],
-                           [0, 1, 0, -self.L1,           0, 0],
-                           [0, 1, 0, -(self.L1 + self.L2), 0, self.Lm],
-                           [0, 1, 0, -(self.L1 + self.L2), 0, self.Lm + self.L3]])
-        
-        # End-effector M matrix. Obtained from previous labs' code
-        self.M = np.array([[1, 0, 0, self.Lm + self.L3 + self.L4],
-                           [0, 1, 0, 0],
-                           [0, 0, 1, self.L1 + self.L2],
-                           [0, 0, 0, 1]])
-    
-    def screw_axis_to_transformation_matrix(self, screw_axis, angle):
-        """
-        Convert a screw axis and angle to a homogeneous transformation matrix.
-
-        Parameters:
-        - screw_axis: A 6D screw axis [Sw, Sv], where Sw is the rotational component
-                        and Sv is the translational component.
-        - angle: The angle of rotation in radians.
-
-        Returns:
-        - transformation_matrix: The 4x4 homogeneous transformation matrix
-                                corresponding to the input screw axis and angle.
-        """
-        assert len(screw_axis) == 6, "Input screw axis must have six components"
-
-        # Extract rotational and translational components from the screw axis
-        Sw = screw_axis[:3]
-        Sv = screw_axis[3:]
-
-        # Matrix form of the screw axis
-        screw_matrix = np.zeros((4, 4))
-        screw_matrix[:3, :3] = np.array([[ 0, -Sw[2], Sw[1]],
-                                         [Sw[2], 0, -Sw[0]],
-                                         [-Sw[1], Sw[0], 0]])
-        screw_matrix[:3, 3] = Sv
-
-        # Exponential map to get the transformation matrix
-        exponential_map = expm(angle * screw_matrix)
-        
-        return exponential_map
-    
-    def twist_vector_from_twist_matrix(self, twist_matrix):
-        """
-        Compute the original 6D twist vector from a 4x4 twist matrix.
-
-        Parameters:
-        - twist_matrix: A 4x4 matrix representing the matrix form of the twist 
-
-        Returns:
-        - twist_vector: The 6D twist vector [w, v] corresponding to the input
-                        twist matrix.
-        """
-        assert twist_matrix.shape == (4, 4), "Input matrix must be 4x4"
-
-        w = np.array([twist_matrix[2, 1], twist_matrix[0, 2], twist_matrix[1, 0]])
-        v = np.array(twist_matrix[:3, 3])
-
-        return np.concatenate((w, v))
-
-    def body_jacobian(self, angles):
-        
-        # The exponential form of each Screw Axis
-        expS1 = self.screw_axis_to_transformation_matrix(self.S[0], angles[0])
-        expS2 = self.screw_axis_to_transformation_matrix(self.S[1], angles[1])
-        expS3 = self.screw_axis_to_transformation_matrix(self.S[2], angles[2])
-        expS4 = self.screw_axis_to_transformation_matrix(self.S[3], angles[3])
-        
-        # Obtain Tsb and Tbs using the multiplication of the exponentials
-        Tsb = expS1 @ expS2 @ expS3 @ expS4 @ self.M
-        Tbs = np.linalg.inv(Tsb)
-
-        # Obtain the adjoint of Tbs
-        R_for_adj = np.array(Tbs[:3, :3])
-        p_for_adj = np.array(Tbs[:3, 3])
-        p_for_adj_bracket = np.array([[0, -p_for_adj[2], p_for_adj[1]], 
-                                      [p_for_adj[2], 0, -p_for_adj[0]], 
-                                      [-p_for_adj[1], p_for_adj[0], 0]])
-        zero_matrix = np.zeros((3,3))
-        Tbs_adj_first_part = np.hstack((R_for_adj, zero_matrix))
-        Tbs_adj_second_part = np.hstack((p_for_adj_bracket @ R_for_adj, R_for_adj))
-        Tbs_adj = np.vstack((Tbs_adj_first_part, Tbs_adj_second_part))
-
-        # Obtain the SPACE Jacobian
-        Js = np.array([[0, -np.sin(angles[0]), 0, 0],
-                       [0, np.cos(angles[0]), 1, 1],
-                       [1, 0, 0, 0],
-                       [0, -0.08945*np.cos(angles[0]), 0.035*np.sin(angles[1]) - 0.1*np.cos(angles[1]) - 0.08945, 0.1*np.sin(angles[2])-0.18945],
-                       [0, -0.08945*np.sin(angles[0]), 0, 0],
-                       [0, 0, 0.035*np.cos(angles[1]) + 0.1*np.sin(angles[1]), 0.1*np.cos(angles[2])+0.035]
-                      ]) 
-        
-        # Obtain the BODY Jacobian
-        Jb = Tbs_adj @ Js
-
-        return Tbs, Jb
-
-    def geom_IK(self, Td):
-        """
-        Gives joint angles using the geometric method.
-        """ 
-        # Get the end-effector coordinates
-        Xt = Td[0,3]; Yt = Td[1,3]; Zt = Td[2,3]
-
-        # Get the end-effector approach vector
-        ax = Td[0,0]; ay = Td[1,0]; az = Td[2,0]
-
-        # Get the wrist vector
-        wx = Xt-self.L4*ax
-        wy = Yt-self.L4*ay
-        wz = Zt-self.L4*az
-        
-        # Calculate some intermediate variables
-        r = np.sqrt((np.power(wx,2))+(np.power(wy,2)))
-        h = wz-self.L1
-        c = np.sqrt((np.power(r,2))+(np.power(h,2)))
-        beta = np.arctan2(self.Lm,self.L2)
-        psi = np.pi/2-beta
-        Lr = np.sqrt((np.power(self.Lm,2))+(np.power(self.L2,2)))
-        phi = np.arccos((np.power(c,2)-np.power(self.L3,2)-np.power(Lr,2))/(-2*Lr*self.L3))
-        gamma = np.arctan2(h,r)
-        alpha = np.arccos((np.power(self.L3,2)-np.power(Lr,2)-np.power(c,2))/(-2*Lr*c))
-        theta_a=np.arctan2(np.sqrt(np.power(ax,2)+np.power(ay,2)),az)
-
-        # Get corresponding joint angles using geometry (elbow-up solution)
-        q1 =  np.arctan2(Yt,Xt) # Waist angle
-        q2 =  (np.pi/2)-beta-alpha-gamma # Shoulder angle
-        q3 =  np.pi-psi-phi # Elbow angle
-        q4 =  theta_a-q2-q3-np.pi/2 # Wrist angle
-
-        # Return angles
-        return [q1, q2, q3, q4]
-
-    def num_IK(self, Tsd, InitGuess):
-        """
-        Gives joint angles using numerical method.
-        """
-        for i in range(1000):
-            # Calculate the end-effector transform (Tsb) evaluated at the InitGuess using the helper functions that you wrote at the beginning.
-            Tbs, Jb = self.body_jacobian(InitGuess)
-            
-            # Compute the body twist
-            matrix_Vb = logm(Tbs @ Tsd) 
-            Vb = self.twist_vector_from_twist_matrix(matrix_Vb) # use the helper function at the beginning to extract the vector
-
-            # Compute new angles
-            NewGuess = InitGuess + np.linalg.pinv(Jb) @ Vb
-
-            # Check if you're done and update initial guess
-            if(np.linalg.norm(abs(NewGuess-InitGuess)) <= 0.001):
-                print(f"\nIteration number: {i}")
-                return [NewGuess[0], NewGuess[1], NewGuess[2], NewGuess[3]] 
-            else:
-                InitGuess = NewGuess
-        print(f"\nSOLUTION NOT FOUND!")
-        print(f"\nIteration number: {i}")
-    
-def main():
-
-    # Define your mode of operation
-    mode = "geometric" # "geometric" or "numeric"
-
-    # Define your grasp and release positions
-    T1 = np.array([[0.819, 0, 0.574, 0.2051],
-                   [0, 1, 0, 0],
-                   [-0.574, 0, 0.819, 0.070],
-                   [0, 0, 0, 1]]) # Gripping location 1
-
-    T2 = np.array([[0, -1, 0, 0],
+# Start by defining some constants such as robot model, visual perception frames, basket transform, etc.
+ROBOT_MODEL = 'px100'
+ROBOT_NAME = ROBOT_MODEL
+REF_FRAME = 'camera_color_optical_frame'
+ARM_TAG_FRAME = f'{ROBOT_NAME}/ar_tag_link'
+ARM_BASE_FRAME = f'{ROBOT_NAME}/base_link'
+Td_release = np.array([[0, -1, 0, 0],
                    [1, 0, 0, 0.2426],
                    [0, 0, 1, 0.18945],
-                   [0, 0, 0, 1]]) # Release Location 1
+                   [0, 0, 0, 1]]) # Basket (or the appropriate object in your design) end-effector transformation
 
-    T3 = np.array([[0.707, 0, 0.707, 0.1818],
-                   [0, 1, 0, 0],
-                   [-0.707, 0, 0.707, 0.04265],
-                   [0, 0, 0, 1]]) # Gripping location 2
-
-    T4 = np.array([[0, 1, 0, 0],
-                   [-1, 0, 0, -0.2426],
-                   [0, 0, 1, 0.18945],
-                   [0, 0, 0, 1]]) # Release Location 2
-
-    # Create the robot object
+    
+def main():
+    # Initialize the arm module along with the point cloud, armtag modules and px100_IK_ex custom API
     bot = InterbotixManipulatorXS(
-        robot_model='px100',
+        robot_model=ROBOT_MODEL,
+        robot_name=ROBOT_NAME,
         group_name='arm',
         gripper_name='gripper'
     )
-    my_api = ourAPI()
+    pcl = InterbotixPointCloudInterface(node_inf=bot.core)
+    armtag = InterbotixArmTagInterface(
+        ref_frame=REF_FRAME,
+        arm_tag_frame=ARM_TAG_FRAME,
+        arm_base_frame=ARM_BASE_FRAME,
+        node_inf=bot.core
+    )
+    my_api = px100_IK_ex.ourAPI()
 
-    # Start with home position
-    bot.arm.go_to_home_pose()
 
-    # Carry out the mission!
-    if mode == "geometric":
-        joint_positions = my_api.geom_IK(T1) # Geometric inverse kinematics. Go to Position 1
-        bot.arm.set_joint_positions(joint_positions) # Set positions
-        
-        bot.gripper.grasp(2.0) # Grasp and wait 1 second
+    # set initial arm and gripper pose
+    bot.arm.go_to_sleep_pose()
+    bot.gripper.release()
 
+    # get the ArmTag pose
+    armtag.find_ref_to_arm_base_transform() 
+
+    # get the cluster positions
+    # sort them from max to min 'x' position w.r.t. the ARM_BASE_FRAME
+    success, clusters = pcl.get_cluster_positions(
+        ref_frame=ARM_BASE_FRAME,
+        sort_axis='x',
+        reverse=True
+    )
+
+    # Create a blue color bound
+    # Define a range for blue color
+    lower_blue = (0, 10, 30)
+    upper_blue = (60, 80, 100)
+
+    # ******************************************************
+    # Modify these
+    lower_yellow = (120, 100, 20)
+    upper_yellow = (170, 160, 70)
+
+    lower_red = (100, 0, 0)
+    upper_red = (150, 70, 70)
+
+    z_offset = 0.02
+    # ******************************************************
+
+    if success:
         bot.arm.go_to_home_pose()
+        # pick up all the objects and drop them in a basket (note: you can design your own experiment)
+        for cluster in clusters:
+            if all(lower_blue[i] <= cluster['color'][i] <= upper_blue[i] for i in range(3)):
+                print("\n\nPICKING UP BLUE...\n\n")
+                # Get the first cube location
+                x, y, z = cluster['position']
+                z = z - z_offset # Fingers link offset (change this offset to match your experiment)
 
-        joint_positions = my_api.geom_IK(T2) # Go to Drop Position 1
-        bot.arm.set_joint_positions(joint_positions)
+                # Go on top of the selected cube
+                theta_base = atan2(y,x) # Waist angle offset
+                new_x = x/cos(theta_base)-0.01 #adjust this also to your own experiment. This is just an example. 
+                # desired pose
+                Td_grasp = np.array([[0.6830127, -0.25881905,  0.6830127,  new_x],
+                                     [0.1830127,  0.96592583,  0.1830127,  y],
+                                     [-0.70710678,  0,  0.70710678,  z],
+                                     [0,  0,  0,  1]])
 
-        bot.gripper.release(2.0) # Wait 1 second
+                joint_positions = my_api.num_IK(Td_grasp, np.array([0,0,0,0])) # Numerical inverse kinematics
+                
+                # Here, I rotated the waist by theta_base. This positioned my end-effector towards the cluster. 
+                bot.arm.set_joint_positions([theta_base,0,0,0]) # Set position
+                bot.arm.set_joint_positions(np.append(theta_base,joint_positions[1:])) # Set position
+                
+                # bot.arm.set_joint_positions(joint_positions) # Set position
+                bot.gripper.grasp(2.0) # Grasp and wait 1 second 
+                bot.arm.set_joint_positions([theta_base,0,0,0]) # Set position
+                bot.arm.go_to_home_pose()    
+                bot.gripper.release(2.0) # Wait 1 second    
+            
+            elif all(lower_yellow[i] <= cluster['color'][i] <= upper_yellow[i] for i in range(3)):
+                print("\n\nPICKING UP YELLOW...\n\n")
+                # Get the first cube location
+                x, y, z = cluster['position']
+                z = z - z_offset # Fingers link offset (change this offset to match your experiment)
 
-        bot.arm.go_to_home_pose()
+                # Go on top of the selected cube
+                theta_base = atan2(y,x) # Waist angle offset
+                new_x = x/cos(theta_base)-0.01 #adjust this also to your own experiment. This is just an example. 
+                
+                # desired pose
+                Td_grasp = np.array([[0.6830127, -0.25881905,  0.6830127,  new_x],
+                                     [0.1830127,  0.96592583,  0.1830127,  y],
+                                     [-0.70710678,  0,  0.70710678,  z],
+                                     [0,  0,  0,  1]])
 
-        joint_positions = my_api.geom_IK(T3) # Go to Position 3
-        bot.arm.set_joint_positions(joint_positions) # Set positions
+                joint_positions = my_api.num_IK(Td_grasp, np.array([0,0,0,0])) # Numerical inverse kinematics
+                
+                # Here, I rotated the waist by theta_base. This positioned my end-effector towards the cluster. 
+                bot.arm.set_joint_positions([theta_base,0,0,0]) # Set position
+                bot.arm.set_joint_positions(np.append(theta_base,joint_positions[1:])) # Set position
+                
+                # bot.arm.set_joint_positions(joint_positions) # Set position
+                bot.gripper.grasp(2.0) # Grasp and wait 1 second 
+                bot.arm.set_joint_positions([theta_base,0,0,0]) # Set position
+                bot.arm.go_to_home_pose()    
+                bot.gripper.release(2.0) # Wait 1 second
+            
+            elif all(lower_red[i] <= cluster['color'][i] <= upper_red[i] for i in range(3)):
+                print("\n\nPICKING UP RED...\n\n")
+                
+                # Get the first cube location
+                x, y, z = cluster['position']
+                z = z - z_offset # Fingers link offset (change this offset to match your experiment)
+                
+                # Go on top of the selected cube
+                theta_base = atan2(y,x) # Waist angle offset
+                new_x = x/cos(theta_base)-0.01 #adjust this also to your own experiment. This is just an example. 
+                
+                # desired pose
+                Td_grasp = np.array([[0.6830127, -0.25881905,  0.6830127,  new_x],
+                                     [0.1830127,  0.96592583,  0.1830127,  y],
+                                     [-0.70710678,  0,  0.70710678,  z],
+                                     [0,  0,  0,  1]])
 
-        bot.gripper.grasp(2.0) # Grasp and wait 1 second
+                joint_positions = my_api.num_IK(Td_grasp, np.array([0,0,0,0])) # Numerical inverse kinematics
+                
+                # Here, I rotated the waist by theta_base. This positioned my end-effector towards the cluster. 
+                bot.arm.set_joint_positions([theta_base,0,0,0]) # Set position
+                bot.arm.set_joint_positions(np.append(theta_base,joint_positions[1:])) # Set position
+                
+                # bot.arm.set_joint_positions(joint_positions) # Set position
+                bot.gripper.grasp(2.0) # Grasp and wait 1 second 
+                bot.arm.set_joint_positions([theta_base,0,0,0]) # Set position
+                bot.arm.go_to_home_pose()    
+                bot.gripper.release(2.0) # Wait 1 second
+            
+            # break
+    else:
+        print('Could not get cluster positions.')
 
-        bot.arm.go_to_home_pose()
-
-        joint_positions = my_api.geom_IK(T4) # Go to Drop Position 2
-        bot.arm.set_joint_positions(joint_positions)
-        
-        bot.gripper.release(2.0) # Wait 1 second
-
-    elif mode == "numeric":
-        joint_positions = my_api.num_IK(T1, np.array([0.0, 0.0, 0.0, 0.0])) # Numeric inverse kinematics. Go to Position 1
-        bot.arm.set_joint_positions(joint_positions) # Set positions
-        
-        bot.gripper.grasp(2.0) # Grasp and wait 2 seconds
-
-        bot.arm.go_to_home_pose()
-
-        joint_positions = my_api.num_IK(T2, np.array([0.0, 0.0, 0.0, 0.0])) # Go to Position 2
-        bot.arm.set_joint_positions(joint_positions)
-        
-        bot.gripper.release(2.0) # Release!
-
-        bot.arm.go_to_home_pose()
-
-        joint_positions = my_api.num_IK(T3, np.array([0.0, 0.0, 0.0, 0.0])) # Numeric inverse kinematics. Go to Position 1
-        bot.arm.set_joint_positions(joint_positions) # Set positions
-
-        bot.gripper.grasp(2.0) # Grasp and wait 2 seconds
-
-        bot.arm.go_to_home_pose()
-
-        joint_positions = my_api.num_IK(T4, np.array([0.0, 0.0, 0.0, 0.0])) # Go to Position 2
-        bot.arm.set_joint_positions(joint_positions)
-
-        bot.gripper.release(2.0) # Release!
-
-    # End mission
-    bot.arm.go_to_home_pose()
+    # Go to sleep
     bot.arm.go_to_sleep_pose()
     bot.shutdown()
 

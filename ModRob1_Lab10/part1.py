@@ -13,9 +13,9 @@ USER INPUTS
 # t4 = np.pi/2
 
 # For our custom pose
-t1 = 0
-t2 = 0
-t3 = 35*np.pi/180
+t1 = 15*np.pi/180
+t2 = 15*np.pi/180
+t3 = 30*np.pi/180
 t4 = 0
 
 # Define the robot properties
